@@ -1,0 +1,61 @@
+{
+  "env": {
+    "es2017": true
+  },
+  "extends": [
+    "standard"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "dist/",
+    "proto/",
+    "src/codecs/"
+  ],
+  "rules": {
+    "sort-imports": "error",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "default",
+        "format": [
+          "strictCamelCase"
+        ]
+      },
+      {
+        "selector": "typeLike",
+        "format": [
+          "StrictPascalCase"
+        ]
+      },
+      {
+        "selector": "enumMember",
+        "format": [
+          "StrictPascalCase"
+        ]
+      },
+      {
+        "selector": "variable",
+        "format": [
+          "strictCamelCase"
+        ],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "parameter",
+        "format": [
+          "strictCamelCase"
+        ],
+        "leadingUnderscore": "allow"
+      }
+    ]
+  }
+}

@@ -4,6 +4,9 @@
   "description": "Typescript library for e-Money",
   "main": "index.js",
   "scripts": {
+    "prepare": "husky install",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/**/*.ts",
     "create-proto-codecs": "./scripts/create-proto-codecs.sh",
     "build": "tsc"
   },
@@ -18,7 +21,10 @@
   },
   "homepage": "https://github.com/e-money/emoneyjs#readme",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
     "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
     "ts-proto": "^1.83.0",
     "typescript": "^4.4.3"
   },
