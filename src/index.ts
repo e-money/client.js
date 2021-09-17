@@ -1,2 +1,1 @@
-export class EmoneyClient {
-}
+export { SigningEmoneyClient } from './signingemoneyclient'
