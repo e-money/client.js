@@ -15,6 +15,9 @@ protoc \
   "${PROTO_DIR}/em/authority/v1/query.proto" \
   "${PROTO_DIR}/em/buyback/v1/query.proto" \
   "${PROTO_DIR}/em/inflation/v1/query.proto" \
+  "${PROTO_DIR}/em/issuer/v1/tx.proto" \
+  "${PROTO_DIR}/em/issuer/v1/query.proto" \
+  "${PROTO_DIR}/em/liquidityprovider/v1/tx.proto" \
   "${PROTO_DIR}/em/liquidityprovider/v1/query.proto" \
   "${PROTO_DIR}/em/market/v1/tx.proto" \
   "${PROTO_DIR}/em/market/v1/query.proto" \
