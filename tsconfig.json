@@ -11,7 +11,7 @@
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "outDir": "dist",
+    "outDir": "build",
     "pretty": true,
     "removeComments": false,
     "sourceMap": true,

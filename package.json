@@ -1,20 +1,25 @@
 {
   "name": "emoneyjs",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Typescript library for e-Money",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "build/",
+    "docs/",
+    "*.md"
+  ],
   "scripts": {
-    "prepare": "husky install",
     "clean": "rm -rf dist",
+    "build": "tsc",
     "lint": "eslint src/**/*.ts",
-    "create-proto-codecs": "./scripts/create-proto-codecs.sh",
-    "build": "tsc"
+    "create-proto-codecs": "./scripts/create-proto-codecs.sh"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/e-money/emoneyjs.git"
   },
-  "author": "",
+  "author": "e-Money A/S",
   "license": "Apache License v2.0",
   "bugs": {
     "url": "https://github.com/e-money/emoneyjs/issues"

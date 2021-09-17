@@ -14,9 +14,8 @@
     "@typescript-eslint"
   ],
   "ignorePatterns": [
-    "dist/",
+    "build/",
     "node_modules/",
-    "dist/",
     "proto/",
     "src/codecs/"
   ],
