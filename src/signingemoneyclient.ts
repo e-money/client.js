@@ -1,13 +1,24 @@
-import { AminoTypes, BroadcastTxResponse, Coin, SigningStargateClient, StdFee } from '@cosmjs/stargate'
+import { AminoTypes, BroadcastTxResponse, Coin, SigningStargateClient, StdFee, createProtobufRpcClient } from '@cosmjs/stargate'
+import { Instrument, Order, TimeInForce } from './codecs/em/market/v1/market'
+import { QueryClientImpl as MarketQueryClient, QueryOrderResponse } from './codecs/em/market/v1/query'
 import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelOrderEncodeObject, MsgCancelReplaceLimitOrderEncodeObject, MsgCancelReplaceMarketOrderEncodeObject } from './registry/encodeobjects/market'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
-import { TimeInForce } from './codecs/em/market/v1/market'
 import { createRegistry } from './registry'
 
 export const emoneyAddressPrefix = 'emoney'
 
 export class SigningEmoneyClient extends SigningStargateClient {
+  protected readonly marketQueryClient: MarketQueryClient
+
+  protected constructor (tmClient: Tendermint34Client | undefined, signer: OfflineSigner) {
+    super(tmClient, signer, {
+      registry: createRegistry(),
+      aminoTypes: new AminoTypes({ prefix: emoneyAddressPrefix })
+    })
+    this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
+  }
+
   public static async connectWithSigner (endpoint: string, signer: OfflineSigner): Promise<SigningEmoneyClient> {
     const tmClient = await Tendermint34Client.connect(endpoint)
     return new SigningEmoneyClient(tmClient, signer)
@@ -17,11 +28,22 @@ export class SigningEmoneyClient extends SigningStargateClient {
     return new SigningEmoneyClient(undefined, signer)
   }
 
-  protected constructor (tmClient: Tendermint34Client | undefined, signer: OfflineSigner) {
-    super(tmClient, signer, {
-      registry: createRegistry(),
-      aminoTypes: new AminoTypes({ prefix: emoneyAddressPrefix })
-    })
+  // Get all instruments and metadata: Last traded price/time and the current best tradable price.
+  public async getInstruments () : Promise<Instrument[]> {
+    const response = await this.marketQueryClient.Instruments({})
+    return response.instruments
+  }
+
+  // Get all orders for a given instrument.
+  public async getInstrumentOrders (source: string, destination: string) : Promise<QueryOrderResponse[]> {
+    const response = await this.marketQueryClient.Instrument({ source, destination })
+    return response.orders
+  }
+
+  // Get all active by owner address. Once an order expires (by being cancelled or fully filled) it is no longer returned.
+  public async getActiveOrders (ownerAddress: string) : Promise<Order[]> {
+    const response = await this.marketQueryClient.ByAccount({ address: ownerAddress })
+    return response.orders
   }
 
   // See https://github.com/e-money/em-ledger/blob/master/x/market/spec/02_messages.md#msgaddlimitorder
