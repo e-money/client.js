@@ -10,8 +10,7 @@
     "*.md"
   ],
   "scripts": {
-    "clean": "rm -rf dist",
-    "build": "tsc",
+    "build": "rm -rf build/ && tsc",
     "lint": "eslint src/**/*.ts",
     "create-proto-codecs": "./scripts/create-proto-codecs.sh"
   },
