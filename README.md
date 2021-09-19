@@ -1,4 +1,6 @@
-![e-Money wordmark](docs/e-money-wordmark.svg)
+<p align="center">
+<img src="https://raw.githubusercontent.com/e-money/emoneyjs/main/img/e-money-wordmark.svg?token=AEJSY5P4SYQOGOSZEIP6PW3BKC2OE" width=500>
+</p>
 
 ## Introduction
 
