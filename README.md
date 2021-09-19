@@ -17,7 +17,7 @@ const [firstAccount] = await wallet.getAccounts()
 const rpcEndpoint = 'https://lilmermaid.validator.network'
 const client = await SigningEmoneyClient.connectWithSigner(rpcEndpoint, wallet)
 
-const recipient = 'cosmos1xv9tklw7d82sezh9haa573wufgy59vmwe6xxe5'
+const recipient = 'emoney1fd04q4fy30vm4vyx9t4c376zz9gg9wql04gx3g'
 const amount = {
   denom: 'eeur',
   amount: '123'
