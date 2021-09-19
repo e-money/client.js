@@ -1,7 +1,15 @@
 {
-  "name": "emoneyjs",
-  "version": "0.1.0",
-  "description": "Typescript library for e-Money",
+  "name": "@e-money/client.js",
+  "version": "0.2.0",
+  "description": "JavaScript client library for e-Money.com",
+  "keywords": [
+    "e-money",
+    "stablecoin",
+    "cryptocurrency",
+    "blockchain",
+    "wallet",
+    "dex"
+  ],
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "files": [
@@ -11,25 +19,31 @@
   ],
   "scripts": {
     "build": "rm -rf build/ && tsc",
+    "docs": "typedoc",
+    "prepack": "npm run build && npm run docs",
     "lint": "eslint src/**/*.ts",
     "create-proto-codecs": "./scripts/create-proto-codecs.sh"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/e-money/emoneyjs.git"
+    "url": "git+https://github.com/e-money/emoney.js.git"
   },
   "author": "e-Money A/S",
   "license": "Apache License v2.0",
+  "contributors": [
+    "Martin Dyring-Andersen <mdyring@users.noreply.github.com>"
+  ],
   "bugs": {
-    "url": "https://github.com/e-money/emoneyjs/issues"
+    "url": "https://github.com/e-money/client.js/issues"
   },
-  "homepage": "https://github.com/e-money/emoneyjs#readme",
+  "homepage": "https://e-money.com",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "ts-proto": "^1.83.0",
+    "typedoc": "^0.22.4",
     "typescript": "^4.4.3"
   },
   "dependencies": {

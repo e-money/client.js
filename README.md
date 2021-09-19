@@ -1,16 +1,32 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/e-money/emoneyjs/main/img/e-money-wordmark.svg?token=AEJSY5P4SYQOGOSZEIP6PW3BKC2OE" width=500>
+  <img src="https://raw.githubusercontent.com/e-money/client.js/main/img/e-money-wordmark.svg?token=AEJSY5IW6KVGLLEUHYPW6JDBKDEBG" width=500>
+  <br />
+  <a href="https://www.npmjs.com/package/@e-money/client.js"><img alt="NPM" src="https://img.shields.io/npm/v/@e-money/client.js"></a>
 </p>
 
-## Introduction
+# Introduction
 
-This library provides e-Money specific types for use with [@cosmjs/stargate](https://github.com/cosmos/cosmjs/blob/main/packages/stargate).
+This library provides e-Money specific features on top of the [@cosmjs/stargate](https://github.com/cosmos/cosmjs/blob/main/packages/stargate) library.
 
-## Market Module (DEX)
+# Market Module (DEX)
 
 See https://github.com/e-money/em-ledger/tree/master/x/market/spec for a general introduction to the market module.
 
-## Example
+## Queries
+
+* getInstruments()
+* getInstrumentOrders()
+* getActiveOrders()
+
+## Orders
+
+* addLimitOrder()
+* addMarketOrder()
+* cancelOrder()
+* cancelReplaceLimitOrder()
+* cancelReplaceMarketOrder()
+
+# Example
 ```
 const mnemonic = 'surround miss nominee dream gap cross assault thank captain prosper drop duty group candy wealth weather scale put'
 const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic)

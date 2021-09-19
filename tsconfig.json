@@ -18,4 +18,12 @@
     "strict": true,
     "target": "es2017",
   },
+  "typedocOptions": {
+    "entryPoints": [
+      "src/index.ts"
+    ],
+    "cleanOutputDir": true,
+    "githubPages": false,
+    "out": "docs"
+  }
 }
