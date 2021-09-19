@@ -4,6 +4,9 @@
 
 This library provides e-Money specific types for use with [@cosmjs/stargate](https://github.com/cosmos/cosmjs/blob/main/packages/stargate).
 
+## Market Module (DEX)
+
+See https://github.com/e-money/em-ledger/tree/master/x/market/spec for a general introduction to the market module.
 
 ## Example
 ```
