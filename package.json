@@ -1,6 +1,6 @@
 {
   "name": "@e-money/client.js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "JavaScript client library for e-Money.com",
   "keywords": [
     "e-money",
@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/e-money/emoney.js.git"
+    "url": "git+https://github.com/e-money/client.js.git"
   },
   "author": "e-Money A/S",
   "license": "Apache License v2.0",
