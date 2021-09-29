@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { AminoMsgAddLimitOrder, AminoMsgAddMarketOrder, AminoMsgCancelOrder, AminoMsgCancelReplaceLimitOrder } from './messages/market'
 import { MsgAddLimitOrder, MsgAddMarketOrder, MsgCancelOrder, MsgCancelReplaceLimitOrder } from '../codecs/em/market/v1/tx'
-import { timeInForceFromJSON, timeInForceToJSON } from '../codecs/em/market/v1/market'
 import { AminoTypes } from '@cosmjs/stargate'
-
-export const emoneyAddressPrefix = 'emoney'
+import { emoneyAddressPrefix } from '../config'
 
 export function createAminoTypes () {
   return new AminoTypes({
@@ -15,7 +13,7 @@ export function createAminoTypes () {
         toAmino: ({ owner, clientOrderId, timeInForce, source, destination }: MsgAddLimitOrder): AminoMsgAddLimitOrder['value'] => ({
           owner,
           client_order_id: clientOrderId,
-          time_in_force: timeInForceToJSON(timeInForce),
+          time_in_force: timeInForce,
           source: source!,
           destination: destination!
         }),
@@ -23,7 +21,7 @@ export function createAminoTypes () {
         fromAmino: ({ owner, client_order_id, time_in_force, source, destination }: AminoMsgAddLimitOrder['value']): MsgAddLimitOrder => ({
           owner,
           clientOrderId: client_order_id,
-          timeInForce: timeInForceFromJSON(time_in_force),
+          timeInForce: time_in_force,
           source,
           destination
         })
@@ -33,7 +31,7 @@ export function createAminoTypes () {
         toAmino: ({ owner, clientOrderId, timeInForce, source, destination, maximumSlippage }: MsgAddMarketOrder): AminoMsgAddMarketOrder['value'] => ({
           owner,
           client_order_id: clientOrderId,
-          time_in_force: timeInForceToJSON(timeInForce),
+          time_in_force: timeInForce,
           source: source,
           destination: destination!,
           maximum_slippage: maximumSlippage
@@ -42,7 +40,7 @@ export function createAminoTypes () {
         fromAmino: ({ owner, client_order_id, time_in_force, source, destination, maximum_slippage }: AminoMsgAddMarketOrder['value']): MsgAddMarketOrder => ({
           owner,
           clientOrderId: client_order_id,
-          timeInForce: timeInForceFromJSON(time_in_force),
+          timeInForce: time_in_force,
           source,
           destination,
           maximumSlippage: maximum_slippage
@@ -66,7 +64,7 @@ export function createAminoTypes () {
           owner,
           original_client_order_id: originalClientOrderId,
           new_client_order_id: newClientOrderId,
-          time_in_force: timeInForceToJSON(timeInForce),
+          time_in_force: timeInForce,
           source: source!,
           destination: destination!
         }),
@@ -75,7 +73,7 @@ export function createAminoTypes () {
           owner,
           originalClientOrderId: original_client_order_id,
           newClientOrderId: new_client_order_id,
-          timeInForce: timeInForceFromJSON(time_in_force),
+          timeInForce: time_in_force,
           source,
           destination
         })

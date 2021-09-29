@@ -10,7 +10,7 @@ export interface AminoMsgAddLimitOrder extends AminoMsg {
     // eslint-disable-next-line camelcase
     readonly client_order_id: string;
     // eslint-disable-next-line camelcase
-    readonly time_in_force: string;
+    readonly time_in_force: number;
     readonly source: Coin;
     readonly destination: Coin;
   };
@@ -28,7 +28,7 @@ export interface AminoMsgAddMarketOrder extends AminoMsg {
     // eslint-disable-next-line camelcase
     readonly client_order_id: string;
     // eslint-disable-next-line camelcase
-    readonly time_in_force: string;
+    readonly time_in_force: number;
     readonly source: string;
     readonly destination: Coin;
     // eslint-disable-next-line camelcase
@@ -65,7 +65,7 @@ export interface AminoMsgCancelReplaceLimitOrder extends AminoMsg {
     // eslint-disable-next-line camelcase
     readonly new_client_order_id: string;
     // eslint-disable-next-line camelcase
-    readonly time_in_force: string;
+    readonly time_in_force: number;
     readonly source: Coin;
     readonly destination: Coin;
   };
