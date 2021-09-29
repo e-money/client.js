@@ -1,6 +1,6 @@
 {
   "name": "@e-money/client.js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "JavaScript client library for e-Money.com",
   "keywords": [
     "e-money",
@@ -47,6 +47,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@cosmjs/amino": "^0.26.0",
     "@cosmjs/proto-signing": "^0.26.0",
     "@cosmjs/stargate": "^0.26.0",
     "@cosmjs/tendermint-rpc": "^0.26.0"

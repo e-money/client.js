@@ -1,9 +1,10 @@
-import { AminoTypes, BroadcastTxResponse, Coin, SigningStargateClient, StdFee, createProtobufRpcClient } from '@cosmjs/stargate'
+import { BroadcastTxResponse, Coin, SigningStargateClient, StdFee, createProtobufRpcClient } from '@cosmjs/stargate'
 import { Instrument, Order, TimeInForce } from './codecs/em/market/v1/market'
 import { QueryClientImpl as MarketQueryClient, QueryOrderResponse } from './codecs/em/market/v1/query'
 import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelOrderEncodeObject, MsgCancelReplaceLimitOrderEncodeObject, MsgCancelReplaceMarketOrderEncodeObject } from './registry/encodeobjects/market'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
+import { createAminoTypes } from './aminotypes'
 import { createRegistry } from './registry'
 
 export const emoneyAddressPrefix = 'emoney'
@@ -14,7 +15,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
   protected constructor (tmClient: Tendermint34Client | undefined, signer: OfflineSigner) {
     super(tmClient, signer, {
       registry: createRegistry(),
-      aminoTypes: new AminoTypes({ prefix: emoneyAddressPrefix })
+      aminoTypes: createAminoTypes()
     })
     this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
   }
