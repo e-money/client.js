@@ -1,5 +1,5 @@
 #!/bin/bash
-PROTO_DIR="./protos"
+PROTO_DIR="./proto"
 OUT_DIR="./src/codecs"
 
 # Prepare output directory
