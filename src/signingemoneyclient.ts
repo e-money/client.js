@@ -41,7 +41,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
   }
 
   // Create StdFee for specified denom and gas amount
-  public async createStdFee (gasAmount: number, denom: string): Promise<StdFee> {
+  public async createFee (gasAmount: number, denom: string): Promise<StdFee> {
     const gasPrices = await this.getGasPrices()
     for (const gasPrice of gasPrices) {
       if (gasPrice.denom === denom) {
