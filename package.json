@@ -1,6 +1,6 @@
 {
   "name": "@e-money/client.js",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "JavaScript client library for e-Money.com",
   "keywords": [
     "e-money",

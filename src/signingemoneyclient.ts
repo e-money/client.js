@@ -3,7 +3,6 @@ import { Instrument, Order, TimeInForce } from './codecs/em/market/v1/market'
 import { QueryClientImpl as MarketQueryClient, QueryOrderResponse } from './codecs/em/market/v1/query'
 import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelOrderEncodeObject, MsgCancelReplaceLimitOrderEncodeObject, MsgCancelReplaceMarketOrderEncodeObject } from './registry/encodeobjects/market'
 import { QueryClientImpl as AuthorityQueryClient } from './codecs/em/authority/v1/query'
-import { DecCoin } from './codecs/cosmos/base/v1beta1/coin'
 import { MsgWithdrawDelegatorRewardEncodeObject } from '@cosmjs/stargate/build/encodeobjects'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
@@ -34,27 +33,27 @@ export class SigningEmoneyClient extends SigningStargateClient {
     return new SigningEmoneyClient(undefined, signer)
   }
 
-  // Get the minimum gas prices
-  public async getGasPrices (): Promise<DecCoin[]> {
+  // Get the minimum gas price for the denom (or throw).
+  public async getGasPrice (denom: string): Promise<number> {
     const response = await this.authorityQueryClient.GasPrices({})
-    return response.minGasPrices
-  }
-
-  // Create StdFee for specified denom and gas amount
-  public async createFee (gasAmount: number, denom: string): Promise<StdFee> {
-    const gasPrices = await this.getGasPrices()
-    for (const gasPrice of gasPrices) {
+    for (const gasPrice of response.minGasPrices) {
       if (gasPrice.denom === denom) {
-        return {
-          gas: gasAmount.toFixed(0),
-          amount: [{
-            denom,
-            amount: (gasAmount * Number(gasPrice.amount)).toFixed(0)
-          }]
-        }
+        return Number(gasPrice.amount) / 1000000000000000000
       }
     }
     throw Error(`No gas price found for denom ${denom}`)
+  }
+
+  // Create StdFee for specified denom and gas amount (or throw).
+  public async createFee (gasAmount: number, denom: string): Promise<StdFee> {
+    const gasPrice = await this.getGasPrice(denom)
+    return {
+      gas: gasAmount.toFixed(0),
+      amount: [{
+        denom,
+        amount: (gasAmount * gasPrice).toFixed(0)
+      }]
+    }
   }
 
   // Withdraw rewards from multiple validators using multiple messages. Fee must be sufficient to pay for all messages.
