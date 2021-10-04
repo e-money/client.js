@@ -2,6 +2,9 @@ import { BroadcastTxResponse, Coin, SigningStargateClient, StdFee, createProtobu
 import { Instrument, Order, TimeInForce } from './codecs/em/market/v1/market'
 import { QueryClientImpl as MarketQueryClient, QueryOrderResponse } from './codecs/em/market/v1/query'
 import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelOrderEncodeObject, MsgCancelReplaceLimitOrderEncodeObject, MsgCancelReplaceMarketOrderEncodeObject } from './registry/encodeobjects/market'
+import { QueryClientImpl as AuthorityQueryClient } from './codecs/em/authority/v1/query'
+import { DecCoin } from './codecs/cosmos/base/v1beta1/coin'
+import { MsgWithdrawDelegatorRewardEncodeObject } from '@cosmjs/stargate/build/encodeobjects'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
 import { createAminoTypes } from './aminotypes'
@@ -10,6 +13,7 @@ import { createRegistry } from './registry'
 export const emoneyAddressPrefix = 'emoney'
 
 export class SigningEmoneyClient extends SigningStargateClient {
+  protected readonly authorityQueryClient: AuthorityQueryClient
   protected readonly marketQueryClient: MarketQueryClient
 
   protected constructor (tmClient: Tendermint34Client | undefined, signer: OfflineSigner) {
@@ -17,6 +21,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
       registry: createRegistry(),
       aminoTypes: createAminoTypes()
     })
+    this.authorityQueryClient = new AuthorityQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
   }
 
@@ -27,6 +32,44 @@ export class SigningEmoneyClient extends SigningStargateClient {
 
   public static async offline (signer: OfflineSigner): Promise<SigningEmoneyClient> {
     return new SigningEmoneyClient(undefined, signer)
+  }
+
+  // Get the minimum gas prices
+  public async getGasPrices (): Promise<DecCoin[]> {
+    const response = await this.authorityQueryClient.GasPrices({})
+    return response.minGasPrices
+  }
+
+  // Create StdFee for specified denom and gas amount
+  public async createStdFee (gasAmount: number, denom: string): Promise<StdFee> {
+    const gasPrices = await this.getGasPrices()
+    for (const gasPrice of gasPrices) {
+      if (gasPrice.denom === denom) {
+        return {
+          gas: gasAmount.toString(),
+          amount: [{
+            denom,
+            amount: (gasAmount * Number(gasPrice.amount)).toString()
+          }]
+        }
+      }
+    }
+    throw Error(`No gas price found for denom ${denom}`)
+  }
+
+  // Withdraw rewards from multiple validators using multiple messages. Fee must be sufficient to pay for all messages.
+  public async withdrawRewardsMultiple (delegatorAddress: string, validatorAddresses: string[], fee: StdFee, memo?: string): Promise<BroadcastTxResponse> {
+    const withdrawMsgs: MsgWithdrawDelegatorRewardEncodeObject[] = []
+    for (const validatorAddress of validatorAddresses) {
+      withdrawMsgs.push({
+        typeUrl: '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
+        value: {
+          delegatorAddress: delegatorAddress,
+          validatorAddress: validatorAddress
+        }
+      })
+    }
+    return this.signAndBroadcast(delegatorAddress, withdrawMsgs, fee, memo)
   }
 
   // Get all instruments and metadata: Last traded price/time and the current best tradable price.
