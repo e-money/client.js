@@ -46,10 +46,10 @@ export class SigningEmoneyClient extends SigningStargateClient {
     for (const gasPrice of gasPrices) {
       if (gasPrice.denom === denom) {
         return {
-          gas: gasAmount.toString(),
+          gas: gasAmount.toFixed(0),
           amount: [{
             denom,
-            amount: (gasAmount * Number(gasPrice.amount)).toString()
+            amount: (gasAmount * Number(gasPrice.amount)).toFixed(0)
           }]
         }
       }
