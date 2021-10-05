@@ -11,6 +11,11 @@ import { createRegistry } from './registry'
 
 export const emoneyAddressPrefix = 'emoney'
 
+interface GasPrice {
+  readonly denom: string
+  readonly amount: number
+}
+
 export class SigningEmoneyClient extends SigningStargateClient {
   protected readonly authorityQueryClient: AuthorityQueryClient
   protected readonly marketQueryClient: MarketQueryClient
@@ -33,27 +38,34 @@ export class SigningEmoneyClient extends SigningStargateClient {
     return new SigningEmoneyClient(undefined, signer)
   }
 
-  // Get the minimum gas price for the denom (or throw).
-  public async getGasPrice (denom: string): Promise<number> {
+  // Get the chain-wide gas prices.
+  public async getGasPrices (): Promise<GasPrice[]> {
     const response = await this.authorityQueryClient.GasPrices({})
+    const result: GasPrice[] = []
     for (const gasPrice of response.minGasPrices) {
-      if (gasPrice.denom === denom) {
-        return Number(gasPrice.amount) / 1000000000000000000
-      }
+      result.push({
+        denom: gasPrice.denom,
+        amount: Number(gasPrice.amount) / 1000000000000000000
+      })
     }
-    throw Error(`No gas price found for denom ${denom}`)
+    return result
   }
 
   // Create StdFee for specified denom and gas amount (or throw).
   public async createFee (gasAmount: number, denom: string): Promise<StdFee> {
-    const gasPrice = await this.getGasPrice(denom)
-    return {
-      gas: gasAmount.toFixed(0),
-      amount: [{
-        denom,
-        amount: (gasAmount * gasPrice).toFixed(0)
-      }]
+    const gasPrices = await this.getGasPrices()
+    for (const gasPrice of gasPrices) {
+      if (gasPrice.denom === denom) {
+        return {
+          gas: gasAmount.toFixed(0),
+          amount: [{
+            denom,
+            amount: (gasAmount * gasPrice.amount).toFixed(0)
+          }]
+        }
+      }
     }
+    throw Error(`No gas price found for denom ${denom}`)
   }
 
   // Withdraw rewards from multiple validators using multiple messages. Fee must be sufficient to pay for all messages.
