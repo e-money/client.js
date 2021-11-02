@@ -3,6 +3,7 @@ import { Instrument, Order, TimeInForce } from './codecs/em/market/v1/market'
 import { QueryClientImpl as MarketQueryClient, QueryOrderResponse } from './codecs/em/market/v1/query'
 import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelOrderEncodeObject, MsgCancelReplaceLimitOrderEncodeObject, MsgCancelReplaceMarketOrderEncodeObject } from './registry/encodeobjects/market'
 import { QueryClientImpl as AuthorityQueryClient } from './codecs/em/authority/v1/query'
+import { QueryClientImpl as BankQueryClient } from './codecs/cosmos/bank/v1beta1/query'
 import { MsgWithdrawDelegatorRewardEncodeObject } from '@cosmjs/stargate/build/encodeobjects'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
@@ -11,7 +12,13 @@ import { createRegistry } from './registry'
 
 export const emoneyAddressPrefix = 'emoney'
 
+interface GasPrice {
+  readonly denom: string
+  readonly amount: number
+}
+
 export class SigningEmoneyClient extends SigningStargateClient {
+  protected readonly bankQueryClient: BankQueryClient
   protected readonly authorityQueryClient: AuthorityQueryClient
   protected readonly marketQueryClient: MarketQueryClient
 
@@ -20,6 +27,8 @@ export class SigningEmoneyClient extends SigningStargateClient {
       registry: createRegistry(),
       aminoTypes: createAminoTypes()
     })
+
+    this.bankQueryClient = new BankQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.authorityQueryClient = new AuthorityQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
   }
@@ -33,27 +42,39 @@ export class SigningEmoneyClient extends SigningStargateClient {
     return new SigningEmoneyClient(undefined, signer)
   }
 
-  // Get the minimum gas price for the denom (or throw).
-  public async getGasPrice (denom: string): Promise<number> {
+  // Get the chain-wide gas prices.
+  public async getGasPrices (): Promise<GasPrice[]> {
     const response = await this.authorityQueryClient.GasPrices({})
+    const result: GasPrice[] = []
     for (const gasPrice of response.minGasPrices) {
-      if (gasPrice.denom === denom) {
-        return Number(gasPrice.amount) / 1000000000000000000
-      }
+      result.push({
+        denom: gasPrice.denom,
+        amount: Number(gasPrice.amount) / 1000000000000000000
+      })
     }
-    throw Error(`No gas price found for denom ${denom}`)
+    return result
+  }
+
+  public async getTotalSupply (): Promise<Coin[]> {
+    const response = await this.bankQueryClient.TotalSupply({})
+    return response.supply
   }
 
   // Create StdFee for specified denom and gas amount (or throw).
   public async createFee (gasAmount: number, denom: string): Promise<StdFee> {
-    const gasPrice = await this.getGasPrice(denom)
-    return {
-      gas: gasAmount.toFixed(0),
-      amount: [{
-        denom,
-        amount: (gasAmount * gasPrice).toFixed(0)
-      }]
+    const gasPrices = await this.getGasPrices()
+    for (const gasPrice of gasPrices) {
+      if (gasPrice.denom === denom) {
+        return {
+          gas: gasAmount.toFixed(0),
+          amount: [{
+            denom,
+            amount: (gasAmount * gasPrice.amount).toFixed(0)
+          }]
+        }
+      }
     }
+    throw Error(`No gas price found for denom ${denom}`)
   }
 
   // Withdraw rewards from multiple validators using multiple messages. Fee must be sufficient to pay for all messages.
