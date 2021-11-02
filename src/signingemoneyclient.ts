@@ -3,6 +3,7 @@ import { Instrument, Order, TimeInForce } from './codecs/em/market/v1/market'
 import { QueryClientImpl as MarketQueryClient, QueryOrderResponse } from './codecs/em/market/v1/query'
 import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelOrderEncodeObject, MsgCancelReplaceLimitOrderEncodeObject, MsgCancelReplaceMarketOrderEncodeObject } from './registry/encodeobjects/market'
 import { QueryClientImpl as AuthorityQueryClient } from './codecs/em/authority/v1/query'
+import { QueryClientImpl as BankQueryClient } from './codecs/cosmos/bank/v1beta1/query'
 import { MsgWithdrawDelegatorRewardEncodeObject } from '@cosmjs/stargate/build/encodeobjects'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
@@ -17,6 +18,7 @@ interface GasPrice {
 }
 
 export class SigningEmoneyClient extends SigningStargateClient {
+  protected readonly bankQueryClient: BankQueryClient
   protected readonly authorityQueryClient: AuthorityQueryClient
   protected readonly marketQueryClient: MarketQueryClient
 
@@ -25,6 +27,8 @@ export class SigningEmoneyClient extends SigningStargateClient {
       registry: createRegistry(),
       aminoTypes: createAminoTypes()
     })
+
+    this.bankQueryClient = new BankQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.authorityQueryClient = new AuthorityQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
   }
@@ -49,6 +53,11 @@ export class SigningEmoneyClient extends SigningStargateClient {
       })
     }
     return result
+  }
+
+  public async getTotalSupply (): Promise<Coin[]> {
+    const response = await this.bankQueryClient.TotalSupply({})
+    return response.supply
   }
 
   // Create StdFee for specified denom and gas amount (or throw).
