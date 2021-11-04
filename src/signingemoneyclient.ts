@@ -4,6 +4,7 @@ import { QueryClientImpl as MarketQueryClient, QueryOrderResponse } from './code
 import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelOrderEncodeObject, MsgCancelReplaceLimitOrderEncodeObject, MsgCancelReplaceMarketOrderEncodeObject } from './registry/encodeobjects/market'
 import { QueryClientImpl as AuthorityQueryClient } from './codecs/em/authority/v1/query'
 import { QueryClientImpl as BankQueryClient } from './codecs/cosmos/bank/v1beta1/query'
+import { QueryClientImpl as CustomQueryClient } from './codecs/em/queries/v1/query'
 import { MsgWithdrawDelegatorRewardEncodeObject } from '@cosmjs/stargate/build/encodeobjects'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
@@ -21,6 +22,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
   protected readonly bankQueryClient: BankQueryClient
   protected readonly authorityQueryClient: AuthorityQueryClient
   protected readonly marketQueryClient: MarketQueryClient
+  protected readonly customQueryClient: CustomQueryClient
 
   protected constructor (tmClient: Tendermint34Client | undefined, signer: OfflineSigner) {
     super(tmClient, signer, {
@@ -31,6 +33,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
     this.bankQueryClient = new BankQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.authorityQueryClient = new AuthorityQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
+    this.customQueryClient = new CustomQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
   }
 
   public static async connectWithSigner (endpoint: string, signer: OfflineSigner): Promise<SigningEmoneyClient> {
@@ -55,9 +58,16 @@ export class SigningEmoneyClient extends SigningStargateClient {
     return result
   }
 
+  // Get total supply for all denoms
   public async getTotalSupply (): Promise<Coin[]> {
     const response = await this.bankQueryClient.TotalSupply({})
     return response.supply
+  }
+
+  // Get circulating supply for all denoms
+  public async getCirculatingSupply (): Promise<Coin[]> {
+    const response = await this.customQueryClient.Circulating({})
+    return response.total
   }
 
   // Create StdFee for specified denom and gas amount (or throw).
