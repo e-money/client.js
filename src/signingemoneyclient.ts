@@ -5,9 +5,13 @@ import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelO
 import { QueryClientImpl as AuthorityQueryClient } from './codecs/em/authority/v1/query'
 import { QueryClientImpl as BankQueryClient } from './codecs/cosmos/bank/v1beta1/query'
 import { QueryClientImpl as CustomQueryClient } from './codecs/em/queries/v1/query'
+import Long from 'long'
 import { MsgWithdrawDelegatorRewardEncodeObject } from '@cosmjs/stargate/build/encodeobjects'
 import { OfflineSigner } from '@cosmjs/proto-signing'
+import { PageRequest } from './codecs/cosmos/base/query/v1beta1/pagination'
+import { QueryClientImpl as StakingQueryClient } from './codecs/cosmos/staking/v1beta1/query'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
+import { Validator } from './codecs/cosmos/staking/v1beta1/staking'
 import { createAminoTypes } from './aminotypes'
 import { createRegistry } from './registry'
 
@@ -23,6 +27,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
   protected readonly authorityQueryClient: AuthorityQueryClient
   protected readonly marketQueryClient: MarketQueryClient
   protected readonly customQueryClient: CustomQueryClient
+  protected readonly stakingQueryClient: StakingQueryClient
 
   protected constructor (tmClient: Tendermint34Client | undefined, signer: OfflineSigner) {
     super(tmClient, signer, {
@@ -34,6 +39,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
     this.authorityQueryClient = new AuthorityQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.customQueryClient = new CustomQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
+    this.stakingQueryClient = new StakingQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
   }
 
   public static async connectWithSigner (endpoint: string, signer: OfflineSigner): Promise<SigningEmoneyClient> {
@@ -85,6 +91,27 @@ export class SigningEmoneyClient extends SigningStargateClient {
       }
     }
     throw Error(`No gas price found for denom ${denom}`)
+  }
+
+  // Get all validators
+  public async getValidators (status: string): Promise<Validator[]> {
+    const result: Validator[] = []
+    let pagination: PageRequest | undefined
+    while (true) {
+      const response = await this.stakingQueryClient.Validators({ status, pagination })
+      result.push(...response.validators)
+      if (response.pagination && response.pagination.nextKey.length > 0) {
+        pagination = {
+          key: response.pagination.nextKey,
+          offset: new Long(0),
+          limit: new Long(0),
+          countTotal: false
+        }
+      } else {
+        break
+      }
+    }
+    return result
   }
 
   // Withdraw rewards from multiple validators using multiple messages. Fee must be sufficient to pay for all messages.
