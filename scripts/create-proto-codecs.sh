@@ -22,7 +22,8 @@ protoc \
   "${PROTO_DIR}/em/market/v1/tx.proto" \
   "${PROTO_DIR}/em/market/v1/query.proto" \
   "${PROTO_DIR}/em/queries/v1/query.proto" \
-  "${PROTO_DIR}/cosmos/bank/v1beta1/query.proto"
+  "${PROTO_DIR}/cosmos/bank/v1beta1/query.proto" \
+  "${PROTO_DIR}/cosmos/staking/v1beta1/query.proto"
 
 # Remove unnecessary codec files
 rm -rf \
