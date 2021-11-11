@@ -100,8 +100,10 @@ export class SigningEmoneyClient extends SigningStargateClient {
     while (true) {
       const response = await this.stakingQueryClient.Validators({ status, pagination })
       for (const validator of response.validators) {
-        validator.consensusPubkey
-        // result.push(this.registry.decode(buffer))
+        result.push({
+          ...validator,
+          consensusPubkey: this.registry.decode(validator.consensusPubkey!)
+        })
       }
 
       if (response.pagination &&
