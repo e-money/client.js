@@ -99,8 +99,14 @@ export class SigningEmoneyClient extends SigningStargateClient {
     let pagination: PageRequest | undefined
     while (true) {
       const response = await this.stakingQueryClient.Validators({ status, pagination })
-      result.push(...response.validators)
-      if (response.pagination && response.pagination.nextKey.length > 0) {
+      for (const validator of response.validators) {
+        validator.consensusPubkey
+        // result.push(this.registry.decode(buffer))
+      }
+
+      if (response.pagination &&
+          response.pagination.nextKey &&
+          response.pagination.nextKey.length > 0) {
         pagination = {
           key: response.pagination.nextKey,
           offset: new Long(0),
