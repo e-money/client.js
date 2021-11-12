@@ -23,6 +23,8 @@ protoc \
   "${PROTO_DIR}/em/market/v1/query.proto" \
   "${PROTO_DIR}/em/queries/v1/query.proto" \
   "${PROTO_DIR}/cosmos/bank/v1beta1/query.proto" \
+  "${PROTO_DIR}/cosmos/base/tendermint/v1beta1/query.proto" \
+  "${PROTO_DIR}/cosmos/crypto/ed25519/keys.proto" \
   "${PROTO_DIR}/cosmos/staking/v1beta1/query.proto"
 
 # Remove unnecessary codec files

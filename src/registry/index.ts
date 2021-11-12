@@ -3,7 +3,7 @@ import { MsgAddLimitOrder, MsgAddMarketOrder, MsgCancelOrder, MsgCancelReplaceLi
 import { MsgBurnTokens, MsgMintTokens } from '../codecs/em/liquidityprovider/v1/tx'
 import { MsgCreateIssuer, MsgDestroyIssuer, MsgReplaceAuthority, MsgScheduleUpgrade, MsgSetGasPrices } from '../codecs/em/authority/v1/tx'
 import { MsgDecreaseMintable, MsgIncreaseMintable, MsgRevokeLiquidityProvider, MsgSetInflation } from '../codecs/em/issuer/v1/tx'
-import { PublicKey } from '../codecs/tendermint/crypto/keys'
+import { PubKey } from '../codecs/cosmos/crypto/ed25519/keys'
 import { defaultRegistryTypes } from '@cosmjs/stargate'
 
 // Below are the message types supported by em-ledger
@@ -11,8 +11,8 @@ export const registryTypes: ReadonlyArray<[string, GeneratedType]> = [
   // Stargate
   ...defaultRegistryTypes,
 
-  // Tendermint
-  ['/cosmos.crypto.PubKey', PublicKey],
+  // Crypto
+  ['/cosmos.crypto.ed25519.PubKey', PubKey],
 
   // Authority
   ['/em.authority.v1.MsgCreateIssuer', MsgCreateIssuer],

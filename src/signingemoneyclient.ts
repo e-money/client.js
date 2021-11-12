@@ -5,13 +5,14 @@ import { MsgAddLimitOrderEncodeObject, MsgAddMarketOrderEncodeObject, MsgCancelO
 import { QueryClientImpl as AuthorityQueryClient } from './codecs/em/authority/v1/query'
 import { QueryClientImpl as BankQueryClient } from './codecs/cosmos/bank/v1beta1/query'
 import { QueryClientImpl as CustomQueryClient } from './codecs/em/queries/v1/query'
+import { ServiceClientImpl as TendermintQueryClient, Validator as TendermintValidator } from './codecs/cosmos/base/tendermint/v1beta1/query'
 import Long from 'long'
 import { MsgWithdrawDelegatorRewardEncodeObject } from '@cosmjs/stargate/build/encodeobjects'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { PageRequest } from './codecs/cosmos/base/query/v1beta1/pagination'
 import { QueryClientImpl as StakingQueryClient } from './codecs/cosmos/staking/v1beta1/query'
 import { Tendermint34Client } from '@cosmjs/tendermint-rpc'
-import { Validator } from './codecs/cosmos/staking/v1beta1/staking'
+import { Validator as StakingValidator } from './codecs/cosmos/staking/v1beta1/staking'
 import { createAminoTypes } from './aminotypes'
 import { createRegistry } from './registry'
 
@@ -28,6 +29,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
   protected readonly marketQueryClient: MarketQueryClient
   protected readonly customQueryClient: CustomQueryClient
   protected readonly stakingQueryClient: StakingQueryClient
+  protected readonly tendermintQueryClient: TendermintQueryClient
 
   protected constructor (tmClient: Tendermint34Client | undefined, signer: OfflineSigner) {
     super(tmClient, signer, {
@@ -40,6 +42,7 @@ export class SigningEmoneyClient extends SigningStargateClient {
     this.marketQueryClient = new MarketQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.customQueryClient = new CustomQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
     this.stakingQueryClient = new StakingQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
+    this.tendermintQueryClient = new TendermintQueryClient(createProtobufRpcClient(this.forceGetQueryClient()))
   }
 
   public static async connectWithSigner (endpoint: string, signer: OfflineSigner): Promise<SigningEmoneyClient> {
@@ -94,8 +97,8 @@ export class SigningEmoneyClient extends SigningStargateClient {
   }
 
   // Get all validators
-  public async getValidators (status: string): Promise<Validator[]> {
-    const result: Validator[] = []
+  public async getValidators (status: string): Promise<StakingValidator[]> {
+    const result: StakingValidator[] = []
     let pagination: PageRequest | undefined
     while (true) {
       const response = await this.stakingQueryClient.Validators({ status, pagination })
@@ -109,6 +112,35 @@ export class SigningEmoneyClient extends SigningStargateClient {
       if (response.pagination &&
           response.pagination.nextKey &&
           response.pagination.nextKey.length > 0) {
+        pagination = {
+          key: response.pagination.nextKey,
+          offset: new Long(0),
+          limit: new Long(0),
+          countTotal: false
+        }
+      } else {
+        break
+      }
+    }
+    return result
+  }
+
+  // Get active validator set
+  public async getValidatorSet (): Promise<TendermintValidator[]> {
+    const result: TendermintValidator[] = []
+    let pagination: PageRequest | undefined
+    while (true) {
+      const response = await this.tendermintQueryClient.GetLatestValidatorSet({ pagination: pagination })
+      for (const validator of response.validators) {
+        result.push({
+          ...validator,
+          pubKey: this.registry.decode(validator.pubKey!)
+        })
+      }
+
+      if (response.pagination &&
+        response.pagination.nextKey &&
+        response.pagination.nextKey.length > 0) {
         pagination = {
           key: response.pagination.nextKey,
           offset: new Long(0),
